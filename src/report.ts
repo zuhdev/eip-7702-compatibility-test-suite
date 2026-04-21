@@ -202,7 +202,7 @@ function renderTargetBlock(target: TargetMetadata, fixtures: FixtureMetadata, li
 export function renderMarkdownReport(report: RunReport): string {
   const lines: string[] = [];
 
-  lines.push("# EIP-7702 Compatibility Report");
+  lines.push("# EIP-7702 Conformance Report");
   lines.push("");
   lines.push(`- **Suite:** ${report.suite} v${report.version}`);
   lines.push(`- **Generated:** ${report.generatedAt}`);

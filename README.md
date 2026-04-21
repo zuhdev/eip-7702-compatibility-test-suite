@@ -1,8 +1,8 @@
-# EIP-7702 Compatibility Test Suite
+# EIP-7702 Conformance Harness
 
-[![CI](https://github.com/mtuneccessary/eip-7702-compatibility-test-suite/actions/workflows/ci.yml/badge.svg)](https://github.com/mtuneccessary/eip-7702-compatibility-test-suite/actions/workflows/ci.yml)
+[![CI](https://github.com/zuhdev/eip-7702-conformance-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/zuhdev/eip-7702-conformance-harness/actions/workflows/ci.yml)
 
-A neutral, open-source compatibility harness for [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702). It answers one question for wallet, client, and provider teams:
+A neutral, open-source conformance harness for [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702). It answers one question for wallet, client, and provider teams:
 
 > **What works, where, and under what conditions?**
 

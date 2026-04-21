@@ -1,10 +1,10 @@
 {
-  "suite": "eip-7702-compatibility-test-suite",
+  "suite": "eip-7702-conformance-harness",
   "version": "0.2.0",
-  "generatedAt": "2026-04-21T11:06:11.734Z",
+  "generatedAt": "2026-04-22T10:49:44.508Z",
   "summary": {
-    "totalTargets": 1,
-    "passingTargets": 1,
+    "totalTargets": 2,
+    "passingTargets": 2,
     "failingTargets": 0
   },
   "notes": [
@@ -12,6 +12,20 @@
     "Targets that fail during setup or transport initialization are captured in the matrix index without aborting the remaining runs."
   ],
   "targets": [
+    {
+      "id": "hoodi-alchemy",
+      "label": "Hoodi (Alchemy)",
+      "kind": "rpc",
+      "status": "pass",
+      "targetSummary": {
+        "total": 16,
+        "passed": 16,
+        "failed": 0,
+        "skipped": 0
+      },
+      "reportJsonPath": "hoodi-alchemy/report.json",
+      "reportMarkdownPath": "hoodi-alchemy/report.md"
+    },
     {
       "id": "local-managed",
       "label": "Managed local Anvil (Prague)",

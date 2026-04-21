@@ -5,3 +5,4 @@ out
 reports/latest
 reports/matrix
 .DS_Store
+targets/*.local.json

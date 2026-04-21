@@ -1,8 +1,8 @@
 {
-  "name": "eip-7702-compatibility-test-suite",
+  "name": "eip-7702-conformance-harness",
   "version": "0.2.0",
   "private": true,
-  "description": "Neutral compatibility test harness for EIP-7702. Runs real type-0x04 transactions, authorization tuples, and delegated execution against local nodes or hosted RPC targets, then emits JSON and Markdown reports.",
+  "description": "Neutral conformance harness for EIP-7702. Runs real type-0x04 transactions, authorization tuples, and delegated execution against local nodes or hosted RPC targets, then emits JSON and Markdown reports.",
   "keywords": [
     "eip-7702",
     "ethereum",

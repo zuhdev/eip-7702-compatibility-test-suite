@@ -154,6 +154,21 @@ function toRpcHex(value: bigint): string {
   return `0x${value.toString(16)}`;
 }
 
+function sanitizeRpcUrl(rpcUrl: string): string {
+  try {
+    const parsed = new URL(rpcUrl);
+    const hasSecretPath =
+      (parsed.pathname && parsed.pathname !== "/" && parsed.pathname !== "") ||
+      parsed.search.length > 0;
+    if (!hasSecretPath) {
+      return `${parsed.protocol}//${parsed.host}`;
+    }
+    return `${parsed.protocol}//${parsed.host}/***`;
+  } catch {
+    return rpcUrl;
+  }
+}
+
 function summarizeTests(results: TestResult[]): ReportSummary {
   return {
     total: results.length,
@@ -177,12 +192,7 @@ async function loadBuiltFixtureArtifact(
   contractName: string,
 ): Promise<BuiltFixtureArtifact> {
   const artifact: ContractArtifact = await loadArtifact(rootDir, sourceName, contractName);
-  const artifactPath = path.join(
-    rootDir,
-    "out",
-    `${sourceName}.sol`,
-    `${contractName}.json`,
-  );
+  const artifactPath = path.join("out", `${sourceName}.sol`, `${contractName}.json`);
 
   return {
     artifactPath,
@@ -475,10 +485,10 @@ async function prepareTargetEnvironment(
     id: config.id,
     label: config.label,
     kind: config.kind,
-    rpcUrl,
+    rpcUrl: sanitizeRpcUrl(rpcUrl),
     chainId: config.chainId,
     hardfork: config.kind === "managed-anvil" ? config.hardfork : config.hardfork ?? null,
-    sourcePath: config.sourcePath,
+    sourcePath: config.sourcePath ? path.relative(rootDir, config.sourcePath) : undefined,
   };
 
   const fixtures: FixtureMetadata = {
@@ -551,7 +561,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Submits a real type-0x04 transaction with a valid authorization and checks receipt typing plus delegation side effects.",
       async run(context) {
-        const authority = context.authorities[0];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { transactionHash, receipt } = await sendType7702Transaction({
           context,
           authority,
@@ -605,7 +615,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Uses eth_estimateGas with an authorizationList payload and delegated calldata to verify that provider-side simulation works before broadcast.",
       async run(context) {
-        const authority = context.authorities[1];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { entry, signedAuthorization } = await buildAuthorizationListEntry({
           context,
           authority,
@@ -653,7 +663,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Uses eth_call with an authorizationList payload against a clean authority and checks that delegated execution resolves address(this) to the authority.",
       async run(context) {
-        const authority = context.authorities[1];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { entry, signedAuthorization } = await buildAuthorizationListEntry({
           context,
           authority,
@@ -700,7 +710,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Uses eth_call with an authorizationList payload against a reverting delegated function and verifies that provider error metadata remains actionable.",
       async run(context) {
-        const authority = context.authorities[1];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { entry, signedAuthorization } = await buildAuthorizationListEntry({
           context,
           authority,
@@ -786,7 +796,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Signs an authorization for a mismatched chain ID and verifies the transaction still mines while the authority remains unchanged.",
       async run(context) {
-        const authority = context.authorities[1];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { transactionHash, receipt } = await sendType7702Transaction({
           context,
           authority,
@@ -834,7 +844,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Signs an authorization with a nonce that does not match the authority's current nonce and verifies the outer transaction still mines while the authority remains unchanged.",
       async run(context) {
-        const authority = context.authorities[1];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const attemptedNonce = 99n;
         const { transactionHash, receipt } = await sendType7702Transaction({
           context,
@@ -1004,7 +1014,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Applies a valid delegation first, then sends a second valid authorization to the zero address and verifies that the authority code is cleared.",
       async run(context) {
-        const authority = context.authorities[2];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const firstTransaction = await sendType7702Transaction({
           context,
           authority,
@@ -1063,7 +1073,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Applies a valid authorization that points to the deployed fixture contract and verifies that the indicator and nonce update match the expected contract delegation path.",
       async run(context) {
-        const authority = context.authorities[3];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { transactionHash, receipt } = await sendType7702Transaction({
           context,
           authority,
@@ -1110,7 +1120,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Delegates an authority to the fixture contract, writes storage through the delegated entrypoint, and reads it back from the authority address.",
       async run(context) {
-        const authority = context.authorities[4];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { transactionHash, receipt } = await sendType7702Transaction({
           context,
           authority,
@@ -1167,7 +1177,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Delegates an authority and immediately calls a reverting function through the delegated code path to confirm the code write survives a failed execution.",
       async run(context) {
-        const authority = context.authorities[5];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const { transactionHash, receipt } = await sendType7702Transaction({
           context,
           authority,
@@ -1214,7 +1224,7 @@ function buildTestPlan(): TestDefinition[] {
       description:
         "Delegates an authority to the fixture contract and verifies that delegated execution sees the target runtime code size while external inspection sees the short delegation indicator.",
       async run(context) {
-        const authority = context.authorities[6];
+        const authority = await generateEphemeralAccount(context.rootDir);
         const setup = await sendType7702Transaction({
           context,
           authority,

@@ -1,18 +1,19 @@
 # EIP-7702 Compatibility Matrix
 
-- **Suite:** eip-7702-compatibility-test-suite v0.2.0
-- **Generated:** 2026-04-21T11:06:11.734Z
+- **Suite:** eip-7702-conformance-harness v0.2.0
+- **Generated:** 2026-04-22T10:49:44.508Z
 
 ## Summary
 
 | Targets | Passing | Failing |
 | --- | --- | --- |
-| 1 | 1 | 0 |
+| 2 | 2 | 0 |
 
 ## Targets
 
 | Target | Kind | Result | Passed | Failed | Report |
 | --- | --- | --- | --- | --- | --- |
+| hoodi-alchemy | rpc | PASS | 16 | 0 | [markdown](hoodi-alchemy/report.md) |
 | local-managed | managed-anvil | PASS | 16 | 0 | [markdown](local-managed/report.md) |
 
 ## Notes

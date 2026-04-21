@@ -2,7 +2,7 @@ import type { Account } from "./types.js";
 
 export const DEFAULT_ANVIL_CHAIN_ID = 31337;
 export const DEFAULT_HARDFORK = "prague";
-export const SUITE_NAME = "eip-7702-compatibility-test-suite";
+export const SUITE_NAME = "eip-7702-conformance-harness";
 export const SUITE_VERSION = "0.2.0";
 export const DEFAULT_LEGACY_GAS_PRICE = 2_000_000_000n;
 export const DEFAULT_PRIORITY_FEE = 1_000_000_000n;

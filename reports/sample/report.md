@@ -1,7 +1,7 @@
-# EIP-7702 Compatibility Report
+# EIP-7702 Conformance Report
 
-- **Suite:** eip-7702-compatibility-test-suite v0.2.0
-- **Generated:** 2026-04-21T11:04:54.367Z
+- **Suite:** eip-7702-conformance-harness v0.2.0
+- **Generated:** 2026-04-22T10:52:49.234Z
 
 ## Target
 
@@ -11,7 +11,7 @@
 | Kind | managed-anvil |
 | Chain ID | 31337 |
 | Hardfork | prague |
-| RPC URL | `http://127.0.0.1:53373` |
+| RPC URL | `http://127.0.0.1:65439` |
 
 ### Deployed fixtures
 
@@ -41,22 +41,22 @@
 
 | Category | Test | Result | Duration |
 | --- | --- | --- | --- |
-| Transaction | `transaction.accepts_type_0x04` | PASS | 34ms |
-| RPC | `rpc.estimates_gas_with_authorization_list` | PASS | 35ms |
-| RPC | `rpc.eth_call_simulates_delegated_context` | PASS | 32ms |
-| RPC | `rpc.eth_call_surfaces_revert_metadata` | PASS | 30ms |
-| Authorization | `authorization.skips_invalid_chain_id` | PASS | 28ms |
-| Authorization | `authorization.skips_invalid_nonce` | PASS | 28ms |
-| Authorization | `authorization.accepts_chain_id_zero_for_any_chain` | PASS | 38ms |
-| Authorization | `authorization.overwrites_existing_delegation` | PASS | 66ms |
-| Authorization | `authorization.clears_with_zero_address` | PASS | 57ms |
-| Authorization | `authorization.writes_contract_delegate_indicator` | PASS | 28ms |
-| Execution | `execution.delegated_storage_write` | PASS | 47ms |
-| Execution | `execution.delegation_persists_after_revert` | PASS | 30ms |
-| Execution | `execution.codesize_vs_extcodesize` | PASS | 39ms |
-| Security | `security.unsafe_initializer_can_be_frontrun` | PASS | 81ms |
-| Security | `security.tx_origin_differs_from_authority` | PASS | 66ms |
-| Security | `security.storage_persists_across_redelegations` | PASS | 108ms |
+| Transaction | `transaction.accepts_type_0x04` | PASS | 51ms |
+| RPC | `rpc.estimates_gas_with_authorization_list` | PASS | 55ms |
+| RPC | `rpc.eth_call_simulates_delegated_context` | PASS | 47ms |
+| RPC | `rpc.eth_call_surfaces_revert_metadata` | PASS | 47ms |
+| Authorization | `authorization.skips_invalid_chain_id` | PASS | 42ms |
+| Authorization | `authorization.skips_invalid_nonce` | PASS | 44ms |
+| Authorization | `authorization.accepts_chain_id_zero_for_any_chain` | PASS | 42ms |
+| Authorization | `authorization.overwrites_existing_delegation` | PASS | 78ms |
+| Authorization | `authorization.clears_with_zero_address` | PASS | 76ms |
+| Authorization | `authorization.writes_contract_delegate_indicator` | PASS | 44ms |
+| Execution | `execution.delegated_storage_write` | PASS | 66ms |
+| Execution | `execution.delegation_persists_after_revert` | PASS | 46ms |
+| Execution | `execution.codesize_vs_extcodesize` | PASS | 59ms |
+| Security | `security.unsafe_initializer_can_be_frontrun` | PASS | 94ms |
+| Security | `security.tx_origin_differs_from_authority` | PASS | 77ms |
+| Security | `security.storage_persists_across_redelegations` | PASS | 119ms |
 
 ## Detailed results
 
@@ -64,7 +64,7 @@
 
 #### `transaction.accepts_type_0x04`
 
-**Status:** PASS · **Category:** Transaction · **Duration:** 34ms
+**Status:** PASS · **Category:** Transaction · **Duration:** 51ms
 
 Submits a real type-0x04 transaction with a valid authorization and checks receipt typing plus delegation side effects.
 
@@ -85,8 +85,8 @@ Submits a real type-0x04 transaction with a valid authorization and checks recei
 
 **Evidence**
 
-- transactionHash: `0x0aad4271cdcfea6139c1bcb77d3c4b3f561a65aa161f7a7482d99f91bc208a2b`
-- authority: `0x70997970C51812dc3A010C7d01b50e0d17dc79C8`
+- transactionHash: `0x0e4be319216797d239497e837278035e8c3af438f4b76eb3f2e98b2472bcf11b`
+- authority: `0xdE2B0BD52e1Ba44bC8B24Ca613cc03C5f72d7031`
 - delegateAddress: `0x0000000000000000000000000000000000000001`
 - receiptType: `0x4`
 - code: `0xef01000000000000000000000000000000000000000001`
@@ -95,7 +95,7 @@ Submits a real type-0x04 transaction with a valid authorization and checks recei
 
 #### `rpc.estimates_gas_with_authorization_list`
 
-**Status:** PASS · **Category:** RPC · **Duration:** 35ms
+**Status:** PASS · **Category:** RPC · **Duration:** 55ms
 
 Uses eth_estimateGas with an authorizationList payload and delegated calldata to verify that provider-side simulation works before broadcast.
 
@@ -110,51 +110,51 @@ Uses eth_estimateGas with an authorizationList payload and delegated calldata to
 
 **Evidence**
 
-- authority: `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC`
+- authority: `0x1C3123b89F3E2a0Ac306CA235bb85520E4bc66c6`
 - delegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
-- signedAuthorization: `0xf85c827a69945fbdb2315678afecb367f032d93f642f64180aa38001a025624a5a59ba3fd4a8b93d874183eb46eca7a9329a47081954554b3c3fa1e490a06675890c92133c78f8d8bec7781c278758aa19e02084cd44e08b6434d1409dc6`
+- signedAuthorization: `0xf85c827a69945fbdb2315678afecb367f032d93f642f64180aa38001a0e642724aa3a67a99fe1a7ff0d1703ed91842fc4e49247cc9981bde68992dc699a01f67bc91695fe86f1e0e76ebe225e5ea46505a1087a5bab6a757c700e0749fb0`
 - authorizationListEntry:
   chainId: 0x7a69
   address: 0x5fbdb2315678afecb367f032d93f642f64180aa3
   nonce: 0x0
   yParity: 0x01
-  r: 0x25624a5a59ba3fd4a8b93d874183eb46eca7a9329a47081954554b3c3fa1e490
-  s: 0x6675890c92133c78f8d8bec7781c278758aa19e02084cd44e08b6434d1409dc6
+  r: 0xe642724aa3a67a99fe1a7ff0d1703ed91842fc4e49247cc9981bde68992dc699
+  s: 0x1f67bc91695fe86f1e0e76ebe225e5ea46505a1087a5bab6a757c700e0749fb0
 - calldata: `0x3fb5c1cb000000000000000000000000000000000000000000000000000000000000002a`
 - estimate: `70730`
 - estimateHex: `0x1144a`
 
 #### `rpc.eth_call_simulates_delegated_context`
 
-**Status:** PASS · **Category:** RPC · **Duration:** 32ms
+**Status:** PASS · **Category:** RPC · **Duration:** 47ms
 
 Uses eth_call with an authorizationList payload against a clean authority and checks that delegated execution resolves address(this) to the authority.
 
 **Assertions**
 
 - [x] Delegated eth_call returns the authority as address(this)
-  - expected: `0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc`
-  - actual: `0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc`
+  - expected: `0xf20a869102ac25684910372e9d73cd59c2ca0955`
+  - actual: `0xf20a869102ac25684910372e9d73cd59c2ca0955`
 
 **Evidence**
 
-- authority: `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC`
+- authority: `0xF20A869102ac25684910372E9D73CD59C2Ca0955`
 - delegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
-- signedAuthorization: `0xf85c827a69945fbdb2315678afecb367f032d93f642f64180aa38001a025624a5a59ba3fd4a8b93d874183eb46eca7a9329a47081954554b3c3fa1e490a06675890c92133c78f8d8bec7781c278758aa19e02084cd44e08b6434d1409dc6`
+- signedAuthorization: `0xf85c827a69945fbdb2315678afecb367f032d93f642f64180aa38001a07d03efbc292771cf98374709761519756e529e7e67f2c621605811f2e2c78848a04a20432ddeb193182099f1a7d71551c19d3274cf0096205d845f60971c1501d6`
 - authorizationListEntry:
   chainId: 0x7a69
   address: 0x5fbdb2315678afecb367f032d93f642f64180aa3
   nonce: 0x0
   yParity: 0x01
-  r: 0x25624a5a59ba3fd4a8b93d874183eb46eca7a9329a47081954554b3c3fa1e490
-  s: 0x6675890c92133c78f8d8bec7781c278758aa19e02084cd44e08b6434d1409dc6
+  r: 0x7d03efbc292771cf98374709761519756e529e7e67f2c621605811f2e2c78848
+  s: 0x4a20432ddeb193182099f1a7d71551c19d3274cf0096205d845f60971c1501d6
 - calldata: `0x4a5a8a3b`
-- rawResult: `0x0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc`
-- resolvedContext: `0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc`
+- rawResult: `0x000000000000000000000000f20a869102ac25684910372e9d73cd59c2ca0955`
+- resolvedContext: `0xf20a869102ac25684910372e9d73cd59c2ca0955`
 
 #### `rpc.eth_call_surfaces_revert_metadata`
 
-**Status:** PASS · **Category:** RPC · **Duration:** 30ms
+**Status:** PASS · **Category:** RPC · **Duration:** 47ms
 
 Uses eth_call with an authorizationList payload against a reverting delegated function and verifies that provider error metadata remains actionable.
 
@@ -172,16 +172,16 @@ Uses eth_call with an authorizationList payload against a reverting delegated fu
 
 **Evidence**
 
-- authority: `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC`
+- authority: `0x8D1bd46EcC388F993E141D9d0Fa0F09F2D148340`
 - delegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
-- signedAuthorization: `0xf85c827a69945fbdb2315678afecb367f032d93f642f64180aa38001a025624a5a59ba3fd4a8b93d874183eb46eca7a9329a47081954554b3c3fa1e490a06675890c92133c78f8d8bec7781c278758aa19e02084cd44e08b6434d1409dc6`
+- signedAuthorization: `0xf85c827a69945fbdb2315678afecb367f032d93f642f64180aa38001a06a4ddb6c007f83b9a23a0d7fa9b411afdab448bedda09288f4429b53627660e6a05ce37075c6b6f5ab99ac503dbf91355506e0be234e356ade7139a75a8645a759`
 - authorizationListEntry:
   chainId: 0x7a69
   address: 0x5fbdb2315678afecb367f032d93f642f64180aa3
   nonce: 0x0
   yParity: 0x01
-  r: 0x25624a5a59ba3fd4a8b93d874183eb46eca7a9329a47081954554b3c3fa1e490
-  s: 0x6675890c92133c78f8d8bec7781c278758aa19e02084cd44e08b6434d1409dc6
+  r: 0x6a4ddb6c007f83b9a23a0d7fa9b411afdab448bedda09288f4429b53627660e6
+  s: 0x5ce37075c6b6f5ab99ac503dbf91355506e0be234e356ade7139a75a8645a759
 - calldata: `0x975af67a`
 - errorCode: `3`
 - errorMessage: `eth_call failed [3]: execution reverted: EXPECTED_REVERT`
@@ -191,7 +191,7 @@ Uses eth_call with an authorizationList payload against a reverting delegated fu
 
 #### `authorization.skips_invalid_chain_id`
 
-**Status:** PASS · **Category:** Authorization · **Duration:** 28ms
+**Status:** PASS · **Category:** Authorization · **Duration:** 42ms
 
 Signs an authorization for a mismatched chain ID and verifies the transaction still mines while the authority remains unchanged.
 
@@ -209,14 +209,14 @@ Signs an authorization for a mismatched chain ID and verifies the transaction st
 
 **Evidence**
 
-- transactionHash: `0xb3b7edd8ea668697491ea01bbd045b259e061c1dd63c809f08a93a65e4e41e87`
-- authority: `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC`
+- transactionHash: `0x8f596e6969debe1182b1f3d1592c9ec30c115d06dc9066b6b3e3bf70fbf618b7`
+- authority: `0x4f2fdE3BB5234665188cC5EE90443c6f04D3578d`
 - attemptedDelegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
 - code: `0x`
 
 #### `authorization.skips_invalid_nonce`
 
-**Status:** PASS · **Category:** Authorization · **Duration:** 28ms
+**Status:** PASS · **Category:** Authorization · **Duration:** 44ms
 
 Signs an authorization with a nonce that does not match the authority's current nonce and verifies the outer transaction still mines while the authority remains unchanged.
 
@@ -234,15 +234,15 @@ Signs an authorization with a nonce that does not match the authority's current 
 
 **Evidence**
 
-- transactionHash: `0x98ffafa397c3ce211e6f8f90d9602f224e3800dfd4bf053900e29f5ee2c0b025`
-- authority: `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC`
+- transactionHash: `0x7e54f7bb32fa464f27685f2184877cfc7c1577f58675e70b82bf772252f72195`
+- authority: `0x625cC99D3bE9114Bdc66940241e7ac282a3F52eF`
 - attemptedDelegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
 - attemptedNonce: `99`
 - code: `0x`
 
 #### `authorization.accepts_chain_id_zero_for_any_chain`
 
-**Status:** PASS · **Category:** Authorization · **Duration:** 38ms
+**Status:** PASS · **Category:** Authorization · **Duration:** 42ms
 
 Signs an authorization with chain_id=0 (chain-agnostic per EIP-7702) and verifies it is accepted on the target chain with the expected delegation side effects.
 
@@ -260,15 +260,15 @@ Signs an authorization with chain_id=0 (chain-agnostic per EIP-7702) and verifie
 
 **Evidence**
 
-- transactionHash: `0x0c1d2b36bd2ac1eb2f263b3810861a31ee9cb9c53fde9c84b7086767e4915e9c`
-- authority: `0x70aB79BCC8A0Aaf5032C0982A5734e13E02741F5`
+- transactionHash: `0x57f5af5d2446f2d055781b02eb56159f3773c78fbf8b00878cd96821d890a168`
+- authority: `0xc8Ff7f0525c264A1Ebe902D2Fd51bb63f811Fc55`
 - delegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
-- authorization: `0xf85a80945fbdb2315678afecb367f032d93f642f64180aa38080a080f139e7d7bd5f2e43f653c1680f5028153169e410935231fc2b6b91224de75ba028c93b07d2bb630ca3ff526f03ad886e8414f4fefa91e4fde93f4f8ab435da5f`
+- authorization: `0xf85a80945fbdb2315678afecb367f032d93f642f64180aa38080a05f036016e08a837f06bfe035874cb28d3a0574472f0b68990910aa556922e5fca03dce3e64cf102c74b76965c5141e9603edef9b525e95a1f42815deb8e73838a9`
 - code: `0xef01005fbdb2315678afecb367f032d93f642f64180aa3`
 
 #### `authorization.overwrites_existing_delegation`
 
-**Status:** PASS · **Category:** Authorization · **Duration:** 66ms
+**Status:** PASS · **Category:** Authorization · **Duration:** 78ms
 
 Delegates an authority to the fixture contract, then re-delegates the same authority to a different target and verifies the indicator swaps while the nonce increments twice.
 
@@ -292,9 +292,9 @@ Delegates an authority to the fixture contract, then re-delegates the same autho
 
 **Evidence**
 
-- authority: `0x85D851eBd24E8dFD98eAA5B667BEF2356EC7f117`
-- firstTransactionHash: `0x474ebde397e2067249fa507b1fb2664fb2271049cced56fc748711cb65b94a27`
-- secondTransactionHash: `0xa432283b13b18b6a898722595f01c42463f15a92dd87af4b824936fd04e39b79`
+- authority: `0x7507C2370dFF5dAedd1299dD941891E28F8fb41e`
+- firstTransactionHash: `0x785ce18e3f96c5bf991168a08cada0c2262de68e3335c86b7a7134e594e3578d`
+- secondTransactionHash: `0xbdbeac9bac7d0f19160908b33f7c0d9110c21bc436420bedc54383e93395136c`
 - firstDelegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
 - secondDelegateAddress: `0x0000000000000000000000000000000000000001`
 - firstCode: `0xef01005fbdb2315678afecb367f032d93f642f64180aa3`
@@ -302,7 +302,7 @@ Delegates an authority to the fixture contract, then re-delegates the same autho
 
 #### `authorization.clears_with_zero_address`
 
-**Status:** PASS · **Category:** Authorization · **Duration:** 57ms
+**Status:** PASS · **Category:** Authorization · **Duration:** 76ms
 
 Applies a valid delegation first, then sends a second valid authorization to the zero address and verifies that the authority code is cleared.
 
@@ -323,14 +323,14 @@ Applies a valid delegation first, then sends a second valid authorization to the
 
 **Evidence**
 
-- initialTransactionHash: `0x7173c89f6da07b5c930d47e66d6d442353b323ea990ea15f06080d5ed5fd3f70`
-- clearingTransactionHash: `0x6405f1707db3ddecb20de10f5e9f5930aba054a6a3f9314553984cb5cb7eaf7e`
-- authority: `0x90F79bf6EB2c4f870365E785982E1f101E93b906`
+- initialTransactionHash: `0x008c7753ed3e36e0299694859a86614ee9cb81c49dadd85c44999a5d348f13e3`
+- clearingTransactionHash: `0x8a0119ca6aa1e1cc5fb2da0828e018732125b34807854ae84f7628d6d6dad16d`
+- authority: `0x4496986424Fd7F9b35697Bf63f45C0D3CA64df3b`
 - code: `0x`
 
 #### `authorization.writes_contract_delegate_indicator`
 
-**Status:** PASS · **Category:** Authorization · **Duration:** 28ms
+**Status:** PASS · **Category:** Authorization · **Duration:** 44ms
 
 Applies a valid authorization that points to the deployed fixture contract and verifies that the indicator and nonce update match the expected contract delegation path.
 
@@ -348,8 +348,8 @@ Applies a valid authorization that points to the deployed fixture contract and v
 
 **Evidence**
 
-- transactionHash: `0x0be938c078a14dde6832d995fb93f222b67e7fde855c99d4a0cd349144852fd0`
-- authority: `0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65`
+- transactionHash: `0x7089a2eaea3d12d9fcdbb83b4ce3bc1b9d9b35da59458873459a10b345fe032b`
+- authority: `0x6194aDcDC28001db78f0c3cC17a2000e8Bab19d5`
 - delegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
 - code: `0xef01005fbdb2315678afecb367f032d93f642f64180aa3`
 
@@ -357,7 +357,7 @@ Applies a valid authorization that points to the deployed fixture contract and v
 
 #### `execution.delegated_storage_write`
 
-**Status:** PASS · **Category:** Execution · **Duration:** 47ms
+**Status:** PASS · **Category:** Execution · **Duration:** 66ms
 
 Delegates an authority to the fixture contract, writes storage through the delegated entrypoint, and reads it back from the authority address.
 
@@ -370,20 +370,20 @@ Delegates an authority to the fixture contract, writes storage through the deleg
   - expected: `42`
   - actual: `42`
 - [x] address(this) resolves to the authority during delegated execution
-  - expected: `0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc`
-  - actual: `0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc`
+  - expected: `0x186f56bf6bb30219a5e051bec5792322fc92d9da`
+  - actual: `0x186f56bf6bb30219a5e051bec5792322fc92d9da`
 
 **Evidence**
 
-- transactionHash: `0xa6fc156cc56f3339fed65c30c2d2a7666b8cc68e2791544cba61fcfa2b7a820b`
-- authority: `0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc`
+- transactionHash: `0x0f2f2010a6c2d867dcf65b45b608642cc19386c1aabf951ce474083aa951121f`
+- authority: `0x186f56BF6Bb30219A5e051bec5792322Fc92d9da`
 - delegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
 - storedNumber: `42`
-- contextAddress: `0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc`
+- contextAddress: `0x186f56bf6bb30219a5e051bec5792322fc92d9da`
 
 #### `execution.delegation_persists_after_revert`
 
-**Status:** PASS · **Category:** Execution · **Duration:** 30ms
+**Status:** PASS · **Category:** Execution · **Duration:** 46ms
 
 Delegates an authority and immediately calls a reverting function through the delegated code path to confirm the code write survives a failed execution.
 
@@ -401,13 +401,13 @@ Delegates an authority and immediately calls a reverting function through the de
 
 **Evidence**
 
-- transactionHash: `0x8865577c489e2a671f8dc7fe7ec0086dbc14c70ab42d8bb239f3a4616db422f0`
-- authority: `0x976EA74026E726554dB657fA54763abd0C3a0aa9`
+- transactionHash: `0xcf4cddc9883724f3cdca4effba3c46f6b4b6ab7822512a68dd2a33e6a1762325`
+- authority: `0x9805EcA7AadeEE3FeDcc6c220FdAD1Ebd9a27597`
 - code: `0xef01005fbdb2315678afecb367f032d93f642f64180aa3`
 
 #### `execution.codesize_vs_extcodesize`
 
-**Status:** PASS · **Category:** Execution · **Duration:** 39ms
+**Status:** PASS · **Category:** Execution · **Duration:** 59ms
 
 Delegates an authority to the fixture contract and verifies that delegated execution sees the target runtime code size while external inspection sees the short delegation indicator.
 
@@ -428,8 +428,8 @@ Delegates an authority to the fixture contract and verifies that delegated execu
 
 **Evidence**
 
-- setupTransactionHash: `0x5cd050b4e0018fc71c37f7847007f1e82bc379074c020ee16c1a2a0861fa0c64`
-- authority: `0x14dC79964da2C08b23698B3D3cc7Ca32193d9955`
+- setupTransactionHash: `0x1c2971757453387303c3a30cad8952d26f98c29b1933a241709f54919a351b86`
+- authority: `0xf8A12514C6944DCB31846c8F0d5E7eaF99085556`
 - runtimeCodeSize: `449`
 - authorityExtCodeSize: `23`
 - code: `0xef01005fbdb2315678afecb367f032d93f642f64180aa3`
@@ -438,7 +438,7 @@ Delegates an authority to the fixture contract and verifies that delegated execu
 
 #### `security.unsafe_initializer_can_be_frontrun`
 
-**Status:** PASS · **Category:** Security · **Duration:** 81ms
+**Status:** PASS · **Category:** Security · **Duration:** 94ms
 
 Delegates an authority to an UnsafeInitializer contract and has the sponsor claim the owner slot before the authority ever gets a chance, demonstrating why initializer-without-access-control patterns are dangerous under EIP-7702.
 
@@ -459,10 +459,10 @@ Delegates an authority to an UnsafeInitializer contract and has the sponsor clai
 
 **Evidence**
 
-- authority: `0xB210006cfa19dF940972AB676Ce6F86e36Cb463E`
+- authority: `0xE829834754E919bFEf68A0F177c798a31e8Dc999`
 - unsafeInitializerDelegate: `0xe7f1725e7734ce288f8367e1bb143e90bb3f0512`
-- delegationTransactionHash: `0x0f0ee2b8b7c1337a7cbca95178d11a71c738618f93c3e9f959a72329cccedbc4`
-- attackerTransactionHash: `0xa00372428dd66730997bc141f538084796bc80f581219917655e0eca261a1469`
+- delegationTransactionHash: `0x335617e5510e45d2d9730a150c60a26514ee235aeab84fee16167e67aac0f7d4`
+- attackerTransactionHash: `0xf332aab042751bbaf28c282509792ae8c651b9459db35ecbbf302a4fe1c73c4b`
 - attacker: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`
 - observedOwner: `0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266`
 - observedInitialized: `1`
@@ -470,7 +470,7 @@ Delegates an authority to an UnsafeInitializer contract and has the sponsor clai
 
 #### `security.tx_origin_differs_from_authority`
 
-**Status:** PASS · **Category:** Security · **Duration:** 66ms
+**Status:** PASS · **Category:** Security · **Duration:** 77ms
 
 Delegates an authority to a TxOriginSensor contract and submits a sponsor-signed type-0x04 call to observe(). The sensor stores tx.origin/msg.sender/address(this) in authority storage so the test can prove tx.origin resolves to the sponsor (breaking any dApp-side "tx.origin == expected user" check).
 
@@ -486,23 +486,23 @@ Delegates an authority to a TxOriginSensor contract and submits a sponsor-signed
   - expected: `0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266`
   - actual: `0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266`
 - [x] address(this) during delegated execution is the authority
-  - expected: `0xbdad545f3964519dac316acdf0a321353248ed80`
-  - actual: `0xbdad545f3964519dac316acdf0a321353248ed80`
+  - expected: `0xca01f3fa1e349f849d7cca0204ec1e818e5279db`
+  - actual: `0xca01f3fa1e349f849d7cca0204ec1e818e5279db`
 
 **Evidence**
 
-- authority: `0xbdAd545f3964519Dac316aCDF0a321353248ed80`
+- authority: `0xca01F3fa1e349F849d7CCA0204Ec1e818E5279dB`
 - sponsor: `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`
 - txOriginSensorDelegate: `0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0`
-- transactionHash: `0xa588b5e7ee34db3b3bdcd7ec4e3655a43a29544286a358001be1d0dfa7bdaac1`
+- transactionHash: `0x04a398c35d125f7f6518ceea88daca9fbb68fda9ca25943bc762572f36cd00e2`
 - observedOrigin: `0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266`
 - observedSender: `0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266`
-- observedSelf: `0xbdad545f3964519dac316acdf0a321353248ed80`
+- observedSelf: `0xca01f3fa1e349f849d7cca0204ec1e818e5279db`
 - note: `EIP-7702 does not change tx.origin semantics: the sponsor signing the outer transaction is tx.origin. Delegates that rely on tx.origin for authorization treat sponsored flows as the sponsor, not the authority.`
 
 #### `security.storage_persists_across_redelegations`
 
-**Status:** PASS · **Category:** Security · **Duration:** 108ms
+**Status:** PASS · **Category:** Security · **Duration:** 119ms
 
 Delegates an authority to the fixture, writes storage through the delegated code, clears the delegation to the zero address, and re-delegates. Reads storage again through the new delegation and verifies the prior value survived, proving storage is bound to the authority address and not to the delegate code.
 
@@ -532,11 +532,11 @@ Delegates an authority to the fixture, writes storage through the delegated code
 
 **Evidence**
 
-- authority: `0xdC5924496467BAe3Bd71d7ef41A42C63AFbA33A1`
+- authority: `0x1A9F8d0F7f96a79eE3F506E33271d07f2560Ac9d`
 - delegateAddress: `0x5fbdb2315678afecb367f032d93f642f64180aa3`
-- writeTransactionHash: `0xb4b7fe88531c38a59f6b5552199f9624189e96444de9994d8559f606847d42f8`
-- clearTransactionHash: `0xb07f1f1221d4b6de5d3aa45ff6f7e4c1ef9834bba5ac124e05404751b09471e1`
-- redelegationTransactionHash: `0x49ed067846f483ccee90ddb9ef3c7ab291c7b77bdebd9071267aa3c8a15e6e49`
+- writeTransactionHash: `0x173c4e06a14979c918b26d32fd93e11ed978fb46867ce577e48d7deb042a61f6`
+- clearTransactionHash: `0x8b05b87be4f57c8932f1916950ded7b8b6a585f1c1823c06efd1c4f2ff038012`
+- redelegationTransactionHash: `0xf98e6dbf7cfab8b6c1462a4e7915dab4705422d0ea06a96e8e284feb02fc3dd4`
 - writeValue: `424242`
 - observedStoredNumber: `424242`
 - codeAfterClear: `0x`

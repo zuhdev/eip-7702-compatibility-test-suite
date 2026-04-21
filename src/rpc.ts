@@ -84,7 +84,7 @@ export class RpcClient {
     return await this.request<TransactionReceipt | null>("eth_getTransactionReceipt", [hash]);
   }
 
-  async waitForReceipt(hash: string, timeoutMs = 10_000): Promise<TransactionReceipt> {
+  async waitForReceipt(hash: string, timeoutMs = 120_000): Promise<TransactionReceipt> {
     const deadline = Date.now() + timeoutMs;
 
     while (Date.now() < deadline) {
