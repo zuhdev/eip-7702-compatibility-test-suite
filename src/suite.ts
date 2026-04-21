@@ -8,6 +8,7 @@ import {
   DEFAULT_MAX_FEE,
   DEFAULT_PRIORITY_FEE,
   DEPLOY_GAS_LIMIT,
+  LEGACY_CALL_GAS_LIMIT,
   PRECOMPILE_ONE,
   REQUIRED_AUTHORITY_COUNT,
   SUITE_NAME,
@@ -23,6 +24,7 @@ import {
   loadArtifact,
   signAuthorization,
   signCreateTransaction,
+  signLegacyTransaction,
   signType7702Transaction,
 } from "./foundry.js";
 import { renderMarkdownReport, renderMatrixMarkdownReport } from "./report.js";
@@ -58,6 +60,12 @@ interface BuiltFixtureArtifact {
   runtimeBytecodeSize: number;
 }
 
+interface BuiltFixtureArtifacts {
+  delegationTarget: BuiltFixtureArtifact;
+  unsafeInitializer: BuiltFixtureArtifact;
+  txOriginSensor: BuiltFixtureArtifact;
+}
+
 interface PreparedTargetEnvironment {
   context: SuiteContext;
   fixtures: FixtureMetadata;
@@ -90,7 +98,7 @@ export interface MatrixRunArtifacts {
   markdownPath: string;
 }
 
-const fixtureCache = new Map<string, Promise<BuiltFixtureArtifact>>();
+const fixtureCache = new Map<string, Promise<BuiltFixtureArtifacts>>();
 
 function sanitizeEnv(): NodeJS.ProcessEnv {
   return {
@@ -163,32 +171,43 @@ function assertSufficientAuthorities(authorities: Account[], targetId: string): 
   }
 }
 
-async function getBuiltFixtureArtifact(rootDir: string): Promise<BuiltFixtureArtifact> {
+async function loadBuiltFixtureArtifact(
+  rootDir: string,
+  sourceName: string,
+  contractName: string,
+): Promise<BuiltFixtureArtifact> {
+  const artifact: ContractArtifact = await loadArtifact(rootDir, sourceName, contractName);
+  const artifactPath = path.join(
+    rootDir,
+    "out",
+    `${sourceName}.sol`,
+    `${contractName}.json`,
+  );
+
+  return {
+    artifactPath,
+    initCode: artifact.bytecode.object,
+    runtimeBytecodeSize: hexByteLength(artifact.deployedBytecode.object),
+  };
+}
+
+async function getBuiltFixtureArtifacts(rootDir: string): Promise<BuiltFixtureArtifacts> {
   const cached = fixtureCache.get(rootDir);
   if (cached) {
     return await cached;
   }
 
-  const pending = (async (): Promise<BuiltFixtureArtifact> => {
+  const pending = (async (): Promise<BuiltFixtureArtifacts> => {
     const solcPath = await resolveExecutablePath("solc");
     await buildContracts(rootDir, solcPath);
-    const artifact: ContractArtifact = await loadArtifact(
-      rootDir,
-      "DelegationTarget",
-      "DelegationTarget",
-    );
-    const artifactPath = path.join(
-      rootDir,
-      "out",
-      "DelegationTarget.sol",
-      "DelegationTarget.json",
-    );
 
-    return {
-      artifactPath,
-      initCode: artifact.bytecode.object,
-      runtimeBytecodeSize: hexByteLength(artifact.deployedBytecode.object),
-    };
+    const [delegationTarget, unsafeInitializer, txOriginSensor] = await Promise.all([
+      loadBuiltFixtureArtifact(rootDir, "DelegationTarget", "DelegationTarget"),
+      loadBuiltFixtureArtifact(rootDir, "SecurityFixtures", "UnsafeInitializer"),
+      loadBuiltFixtureArtifact(rootDir, "SecurityFixtures", "TxOriginSensor"),
+    ]);
+
+    return { delegationTarget, unsafeInitializer, txOriginSensor };
   })();
 
   fixtureCache.set(rootDir, pending);
@@ -273,7 +292,7 @@ async function buildAuthorizationListEntry(input: {
   };
 }
 
-async function deployDelegationTarget(
+async function deployFixtureContract(
   rootDir: string,
   rpc: RpcClient,
   sponsor: Account,
@@ -401,7 +420,7 @@ function resolveManagedAccounts(config: ManagedAnvilTargetConfig): {
 async function prepareTargetEnvironment(
   rootDir: string,
   config: TargetConfig,
-  builtFixture: BuiltFixtureArtifact,
+  builtFixtures: BuiltFixtureArtifacts,
 ): Promise<PreparedTargetEnvironment> {
   let cleanup = async (): Promise<void> => {};
   let rpcUrl = "";
@@ -423,17 +442,34 @@ async function prepareTargetEnvironment(
   }
 
   const rpc = new RpcClient(rpcUrl);
-  const deploymentReceipt = await deployDelegationTarget(
-    rootDir,
-    rpc,
-    sponsor,
-    config.chainId,
-    builtFixture.initCode,
-  );
 
-  if (!deploymentReceipt.contractAddress) {
-    throw new Error(`Fixture deployment failed for target ${config.id}: no contract address.`);
-  }
+  const deployFixture = async (
+    artifact: BuiltFixtureArtifact,
+    label: string,
+  ): Promise<{ address: string; artifactPath: string; runtimeBytecodeSize: number }> => {
+    const receipt = await deployFixtureContract(
+      rootDir,
+      rpc,
+      sponsor,
+      config.chainId,
+      artifact.initCode,
+    );
+    if (!receipt.contractAddress) {
+      throw new Error(`${label} deployment failed for target ${config.id}: no contract address.`);
+    }
+    return {
+      address: receipt.contractAddress,
+      artifactPath: artifact.artifactPath,
+      runtimeBytecodeSize: artifact.runtimeBytecodeSize,
+    };
+  };
+
+  const delegationTarget = await deployFixture(builtFixtures.delegationTarget, "DelegationTarget");
+  const unsafeInitializer = await deployFixture(
+    builtFixtures.unsafeInitializer,
+    "UnsafeInitializer",
+  );
+  const txOriginSensor = await deployFixture(builtFixtures.txOriginSensor, "TxOriginSensor");
 
   const target: TargetMetadata = {
     id: config.id,
@@ -446,11 +482,9 @@ async function prepareTargetEnvironment(
   };
 
   const fixtures: FixtureMetadata = {
-    delegationTarget: {
-      address: deploymentReceipt.contractAddress,
-      artifactPath: builtFixture.artifactPath,
-      runtimeBytecodeSize: builtFixture.runtimeBytecodeSize,
-    },
+    delegationTarget,
+    unsafeInitializer,
+    txOriginSensor,
   };
 
   const context: SuiteContext = {
@@ -461,6 +495,8 @@ async function prepareTargetEnvironment(
     authorities,
     delegationTarget: fixtures.delegationTarget.address,
     delegationTargetRuntimeSize: fixtures.delegationTarget.runtimeBytecodeSize,
+    unsafeInitializerDelegate: fixtures.unsafeInitializer.address,
+    txOriginSensorDelegate: fixtures.txOriginSensor.address,
   };
 
   return {
@@ -1230,6 +1266,267 @@ function buildTestPlan(): TestDefinition[] {
         };
       },
     },
+    {
+      id: "security.unsafe_initializer_can_be_frontrun",
+      title: "Unsafe initializer pattern is exploitable via sponsor front-run",
+      category: "security",
+      description:
+        "Delegates an authority to an UnsafeInitializer contract and has the sponsor claim the owner slot before the authority ever gets a chance, demonstrating why initializer-without-access-control patterns are dangerous under EIP-7702.",
+      async run(context) {
+        const authority = await generateEphemeralAccount(context.rootDir);
+
+        const setup = await sendType7702Transaction({
+          context,
+          authority,
+          delegateAddress: context.unsafeInitializerDelegate,
+          destination: context.sponsor.address,
+        });
+
+        const initializeCalldata = await encodeCalldata(
+          context.rootDir,
+          "initialize(address)",
+          [context.sponsor.address],
+        );
+        const sponsorNonceBefore = await context.rpc.getTransactionCount(
+          context.sponsor.address,
+        );
+        const attackTx = await signLegacyTransaction({
+          cwd: context.rootDir,
+          chainId: context.target.chainId,
+          nonce: sponsorNonceBefore,
+          gasLimit: LEGACY_CALL_GAS_LIMIT,
+          gasPrice: DEFAULT_LEGACY_GAS_PRICE,
+          privateKey: context.sponsor.privateKey,
+          to: authority.address,
+          functionSignature: "initialize(address)",
+          functionArgs: [context.sponsor.address],
+        });
+        const attackHash = await context.rpc.sendRawTransaction(attackTx);
+        const attackReceipt = await context.rpc.waitForReceipt(attackHash);
+
+        const ownerCalldata = await encodeCalldata(context.rootDir, "owner()");
+        const initializedCalldata = await encodeCalldata(context.rootDir, "initialized()");
+        const observedOwner = decodeAddress(
+          await context.rpc.call(authority.address, ownerCalldata),
+        );
+        const observedInitialized = decodeUint256(
+          await context.rpc.call(authority.address, initializedCalldata),
+        );
+
+        return {
+          assertions: [
+            {
+              label: "Delegation setup transaction succeeds",
+              pass: setup.receipt.status === "0x1",
+              expected: "0x1",
+              actual: setup.receipt.status,
+            },
+            {
+              label: "Sponsor-submitted initialize() call succeeds against the delegated authority",
+              pass: attackReceipt.status === "0x1",
+              expected: "0x1",
+              actual: attackReceipt.status,
+            },
+            {
+              label: "Authority storage now marks the contract as initialized",
+              pass: observedInitialized === 1n,
+              expected: "1",
+              actual: observedInitialized.toString(),
+            },
+            {
+              label: "Attacker (sponsor) captured the owner slot in authority storage",
+              pass: normalizeHex(observedOwner) === normalizeHex(context.sponsor.address),
+              expected: normalizeHex(context.sponsor.address),
+              actual: normalizeHex(observedOwner),
+            },
+          ],
+          details: {
+            authority: authority.address,
+            unsafeInitializerDelegate: context.unsafeInitializerDelegate,
+            delegationTransactionHash: setup.transactionHash,
+            attackerTransactionHash: attackHash,
+            attacker: context.sponsor.address,
+            observedOwner,
+            observedInitialized: observedInitialized.toString(),
+            note: "The sponsor races the authority's legitimate initializer and wins; any delegate without access control on initializer-style methods is exploitable post-delegation.",
+          },
+        };
+      },
+    },
+    {
+      id: "security.tx_origin_differs_from_authority",
+      title: "tx.origin during delegated execution reflects the sponsor, not the authority",
+      category: "security",
+      description:
+        "Delegates an authority to a TxOriginSensor contract and submits a sponsor-signed type-0x04 call to observe(). The sensor stores tx.origin/msg.sender/address(this) in authority storage so the test can prove tx.origin resolves to the sponsor (breaking any dApp-side \"tx.origin == expected user\" check).",
+      async run(context) {
+        const authority = await generateEphemeralAccount(context.rootDir);
+
+        const observation = await sendType7702Transaction({
+          context,
+          authority,
+          delegateAddress: context.txOriginSensorDelegate,
+          destination: authority.address,
+          functionSignature: "observe()",
+        });
+
+        const originCalldata = await encodeCalldata(context.rootDir, "observedOrigin()");
+        const senderCalldata = await encodeCalldata(context.rootDir, "observedSender()");
+        const selfCalldata = await encodeCalldata(context.rootDir, "observedSelf()");
+
+        const [originRaw, senderRaw, selfRaw] = await Promise.all([
+          context.rpc.call(authority.address, originCalldata),
+          context.rpc.call(authority.address, senderCalldata),
+          context.rpc.call(authority.address, selfCalldata),
+        ]);
+
+        const observedOrigin = decodeAddress(originRaw);
+        const observedSender = decodeAddress(senderRaw);
+        const observedSelf = decodeAddress(selfRaw);
+
+        return {
+          assertions: [
+            {
+              label: "Delegated observe() transaction succeeds",
+              pass: observation.receipt.status === "0x1",
+              expected: "0x1",
+              actual: observation.receipt.status,
+            },
+            {
+              label: "tx.origin resolves to the sponsor (not the authority)",
+              pass: normalizeHex(observedOrigin) === normalizeHex(context.sponsor.address),
+              expected: normalizeHex(context.sponsor.address),
+              actual: normalizeHex(observedOrigin),
+            },
+            {
+              label: "msg.sender at the entrypoint is the sponsor (top-level call from sponsor EOA)",
+              pass: normalizeHex(observedSender) === normalizeHex(context.sponsor.address),
+              expected: normalizeHex(context.sponsor.address),
+              actual: normalizeHex(observedSender),
+            },
+            {
+              label: "address(this) during delegated execution is the authority",
+              pass: normalizeHex(observedSelf) === normalizeHex(authority.address),
+              expected: normalizeHex(authority.address),
+              actual: normalizeHex(observedSelf),
+            },
+          ],
+          details: {
+            authority: authority.address,
+            sponsor: context.sponsor.address,
+            txOriginSensorDelegate: context.txOriginSensorDelegate,
+            transactionHash: observation.transactionHash,
+            observedOrigin,
+            observedSender,
+            observedSelf,
+            note: "EIP-7702 does not change tx.origin semantics: the sponsor signing the outer transaction is tx.origin. Delegates that rely on tx.origin for authorization treat sponsored flows as the sponsor, not the authority.",
+          },
+        };
+      },
+    },
+    {
+      id: "security.storage_persists_across_redelegations",
+      title: "Authority storage persists when delegation is cleared and reassigned",
+      category: "security",
+      description:
+        "Delegates an authority to the fixture, writes storage through the delegated code, clears the delegation to the zero address, and re-delegates. Reads storage again through the new delegation and verifies the prior value survived, proving storage is bound to the authority address and not to the delegate code.",
+      async run(context) {
+        const authority = await generateEphemeralAccount(context.rootDir);
+        const writeValue = 424242n;
+
+        const initialDelegation = await sendType7702Transaction({
+          context,
+          authority,
+          delegateAddress: context.delegationTarget,
+          destination: authority.address,
+          functionSignature: "setNumber(uint256)",
+          functionArgs: [writeValue.toString()],
+        });
+
+        const clearDelegation = await sendType7702Transaction({
+          context,
+          authority,
+          delegateAddress: ZERO_ADDRESS,
+          destination: context.sponsor.address,
+        });
+        const codeAfterClear = await context.rpc.getCode(authority.address);
+
+        const redelegation = await sendType7702Transaction({
+          context,
+          authority,
+          delegateAddress: context.delegationTarget,
+          destination: context.sponsor.address,
+        });
+        const codeAfterRedelegation = await context.rpc.getCode(authority.address);
+
+        const storedNumberCalldata = await encodeCalldata(context.rootDir, "storedNumber()");
+        const storedNumber = decodeUint256(
+          await context.rpc.call(authority.address, storedNumberCalldata),
+        );
+        const authorityNonce = await context.rpc.getTransactionCount(authority.address);
+
+        return {
+          assertions: [
+            {
+              label: "Initial delegated write transaction succeeds",
+              pass: initialDelegation.receipt.status === "0x1",
+              expected: "0x1",
+              actual: initialDelegation.receipt.status,
+            },
+            {
+              label: "Clearing delegation transaction succeeds",
+              pass: clearDelegation.receipt.status === "0x1",
+              expected: "0x1",
+              actual: clearDelegation.receipt.status,
+            },
+            {
+              label: "Authority code is empty after clearing delegation",
+              pass: normalizeHex(codeAfterClear) === "0x",
+              expected: "0x",
+              actual: normalizeHex(codeAfterClear),
+            },
+            {
+              label: "Re-delegation transaction succeeds",
+              pass: redelegation.receipt.status === "0x1",
+              expected: "0x1",
+              actual: redelegation.receipt.status,
+            },
+            {
+              label: "Indicator points at the fixture after re-delegation",
+              pass:
+                normalizeHex(codeAfterRedelegation) ===
+                delegationIndicator(context.delegationTarget),
+              expected: delegationIndicator(context.delegationTarget),
+              actual: normalizeHex(codeAfterRedelegation),
+            },
+            {
+              label: "Previously written storage value survives the clear/re-delegation cycle",
+              pass: storedNumber === writeValue,
+              expected: writeValue.toString(),
+              actual: storedNumber.toString(),
+            },
+            {
+              label: "Authority nonce increments three times across the cycle",
+              pass: authorityNonce === 3n,
+              expected: "3",
+              actual: authorityNonce.toString(),
+            },
+          ],
+          details: {
+            authority: authority.address,
+            delegateAddress: context.delegationTarget,
+            writeTransactionHash: initialDelegation.transactionHash,
+            clearTransactionHash: clearDelegation.transactionHash,
+            redelegationTransactionHash: redelegation.transactionHash,
+            writeValue: writeValue.toString(),
+            observedStoredNumber: storedNumber.toString(),
+            codeAfterClear,
+            codeAfterRedelegation,
+            note: "Storage is keyed by the authority address, not by the delegate's code hash. A new delegate inherits whatever storage the authority already holds, so delegates that assume \"fresh state\" at any slot can be misled after a re-delegation.",
+          },
+        };
+      },
+    },
   ];
 }
 
@@ -1288,8 +1585,8 @@ export async function runTargetSuite(
   config: TargetConfig,
   outputDir: string,
 ): Promise<SingleTargetRunArtifacts> {
-  const builtFixture = await getBuiltFixtureArtifact(rootDir);
-  const environment = await prepareTargetEnvironment(rootDir, config, builtFixture);
+  const builtFixtures = await getBuiltFixtureArtifacts(rootDir);
+  const environment = await prepareTargetEnvironment(rootDir, config, builtFixtures);
 
   try {
     const tests: TestResult[] = [];
@@ -1326,14 +1623,14 @@ export async function runTargetMatrix(
   configs: TargetConfig[],
   outputDir: string,
 ): Promise<MatrixRunArtifacts> {
-  const builtFixture = await getBuiltFixtureArtifact(rootDir);
+  const builtFixtures = await getBuiltFixtureArtifacts(rootDir);
   const targetResults: MatrixTargetResult[] = [];
 
   for (const config of configs) {
     const targetOutputDir = path.join(outputDir, config.id);
 
     try {
-      const environment = await prepareTargetEnvironment(rootDir, config, builtFixture);
+      const environment = await prepareTargetEnvironment(rootDir, config, builtFixtures);
 
       try {
         const tests: TestResult[] = [];

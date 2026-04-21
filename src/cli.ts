@@ -8,7 +8,13 @@ import {
 import { runTargetMatrix, runTargetSuite } from "./suite.js";
 import type { RunReport, TargetConfig, TestCategory } from "./types.js";
 
-const CATEGORY_ORDER: TestCategory[] = ["transaction", "rpc", "authorization", "execution"];
+const CATEGORY_ORDER: TestCategory[] = [
+  "transaction",
+  "rpc",
+  "authorization",
+  "execution",
+  "security",
+];
 
 function categoryTitle(category: TestCategory): string {
   switch (category) {
@@ -20,6 +26,8 @@ function categoryTitle(category: TestCategory): string {
       return "Authorization";
     case "execution":
       return "Execution";
+    case "security":
+      return "Security";
   }
 }
 

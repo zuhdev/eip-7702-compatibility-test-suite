@@ -7,7 +7,13 @@ import type {
   TestResult,
 } from "./types.js";
 
-const CATEGORY_ORDER: TestCategory[] = ["transaction", "rpc", "authorization", "execution"];
+const CATEGORY_ORDER: TestCategory[] = [
+  "transaction",
+  "rpc",
+  "authorization",
+  "execution",
+  "security",
+];
 
 function categoryLabel(category: TestCategory): string {
   switch (category) {
@@ -19,6 +25,8 @@ function categoryLabel(category: TestCategory): string {
       return "Authorization";
     case "execution":
       return "Execution";
+    case "security":
+      return "Security";
   }
 }
 
@@ -170,11 +178,24 @@ function renderTargetBlock(target: TargetMetadata, fixtures: FixtureMetadata, li
     lines.push(`| Hardfork | ${target.hardfork} |`);
   }
   lines.push(`| RPC URL | \`${target.rpcUrl}\` |`);
-  lines.push(`| Fixture address | \`${fixtures.delegationTarget.address}\` |`);
-  lines.push(`| Fixture runtime size | ${fixtures.delegationTarget.runtimeBytecodeSize} bytes |`);
   if (target.sourcePath) {
     lines.push(`| Config source | \`${target.sourcePath}\` |`);
   }
+  lines.push("");
+
+  lines.push("### Deployed fixtures");
+  lines.push("");
+  lines.push("| Fixture | Address | Runtime size |");
+  lines.push("| --- | --- | --- |");
+  lines.push(
+    `| DelegationTarget | \`${fixtures.delegationTarget.address}\` | ${fixtures.delegationTarget.runtimeBytecodeSize} bytes |`,
+  );
+  lines.push(
+    `| UnsafeInitializer | \`${fixtures.unsafeInitializer.address}\` | ${fixtures.unsafeInitializer.runtimeBytecodeSize} bytes |`,
+  );
+  lines.push(
+    `| TxOriginSensor | \`${fixtures.txOriginSensor.address}\` | ${fixtures.txOriginSensor.runtimeBytecodeSize} bytes |`,
+  );
   lines.push("");
 }
 

@@ -1,4 +1,4 @@
-export type TestCategory = "transaction" | "rpc" | "authorization" | "execution";
+export type TestCategory = "transaction" | "rpc" | "authorization" | "execution" | "security";
 export type TestStatus = "pass" | "fail" | "skip";
 export type TargetKind = "managed-anvil" | "rpc";
 
@@ -63,12 +63,16 @@ export interface TargetMetadata {
   sourcePath?: string;
 }
 
+export interface DeployedFixture {
+  address: string;
+  artifactPath: string;
+  runtimeBytecodeSize: number;
+}
+
 export interface FixtureMetadata {
-  delegationTarget: {
-    address: string;
-    artifactPath: string;
-    runtimeBytecodeSize: number;
-  };
+  delegationTarget: DeployedFixture;
+  unsafeInitializer: DeployedFixture;
+  txOriginSensor: DeployedFixture;
 }
 
 export interface ReportSummary {
@@ -151,6 +155,8 @@ export interface SuiteContext {
   authorities: Account[];
   delegationTarget: string;
   delegationTargetRuntimeSize: number;
+  unsafeInitializerDelegate: string;
+  txOriginSensorDelegate: string;
 }
 
 export interface RpcClientLike {

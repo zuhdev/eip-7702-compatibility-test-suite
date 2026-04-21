@@ -15,7 +15,7 @@ See [`reports/sample/report.md`](reports/sample/report.md) for a committed sampl
 
 ## Status
 
-The prototype runs end-to-end today against a managed local Anvil pinned to the Prague hardfork and produces 13 passing tests across four spec-aligned categories.
+The prototype runs end-to-end today against a managed local Anvil pinned to the Prague hardfork and produces 16 passing tests across five spec-aligned categories.
 
 | Category | Tests | What it measures |
 | --- | --- | --- |
@@ -23,6 +23,7 @@ The prototype runs end-to-end today against a managed local Anvil pinned to the 
 | RPC | 3 | Provider-side simulation (`eth_estimateGas`, `eth_call`) and revert-metadata fidelity |
 | Authorization | 6 | EIP-7702 tuple rules — chain ID, nonce, zero-address clearing, chain-agnostic `chain_id = 0`, delegation overwrite, contract-target indicator |
 | Execution | 3 | Delegated storage, delegation persistence across reverts, `codesize` vs `extcodesize` divergence |
+| Security | 3 | Spec-called-out misuse patterns — front-runnable initializers, `tx.origin` under sponsored delegation, storage survival across re-delegation |
 
 The same test plan is the foundation for the RPC-target mode, which accepts a sponsor and a set of authority keypairs and runs the suite against any EIP-7702-capable endpoint.
 
@@ -48,6 +49,12 @@ The same test plan is the foundation for the RPC-target mode, which accepts a sp
 - **`execution.delegated_storage_write`** — writing through the delegated entrypoint mutates storage in the authority's account context.
 - **`execution.delegation_persists_after_revert`** — the indicator survives even when the outer execution reverts.
 - **`execution.codesize_vs_extcodesize`** — internally the fixture's `CODESIZE` equals its runtime bytecode, while external `EXTCODESIZE` only sees the 23-byte indicator.
+
+### Security
+These tests model the misuse patterns the EIP-7702 security considerations call out. They exist so wallet and dApp teams can verify that tooling exposes the behavior a user could be tricked by, not just the happy path.
+- **`security.unsafe_initializer_can_be_frontrun`** — delegates an authority to an `UnsafeInitializer` fixture and has the sponsor race the authority to call `initialize(attacker)`. Proves that initializer-style delegates without access control are exploitable post-delegation: whoever executes `initialize` first takes the owner slot.
+- **`security.tx_origin_differs_from_authority`** — delegates to a `TxOriginSensor` fixture that records `tx.origin`, `msg.sender`, and `address(this)` in authority storage during a sponsored call. Confirms that `tx.origin` resolves to the sponsor (not the authority), so any dApp-side `require(tx.origin == user)` guard silently breaks when a 7702 authority is sponsored.
+- **`security.storage_persists_across_redelegations`** — writes storage through one delegate, clears delegation to `0x0…0`, re-delegates to the same code, and reads the slot back. Proves that storage is bound to the authority address (not the delegate code hash), so a new delegation inherits any state the authority already holds.
 
 ## Architecture
 
@@ -81,6 +88,7 @@ The same test plan is the foundation for the RPC-target mode, which accepts a sp
 - **`src/report.ts`** — JSON and Markdown renderers. Both are deterministic given the same run data.
 - **`src/config.ts`** — target config loader for `managed-anvil` and `rpc` kinds, with schema-style validation.
 - **`contracts/DelegationTarget.sol`** — fixture contract deployed once per target, exposing storage writes, `address(this)` inspection, code-size comparison, and a reverting function.
+- **`contracts/SecurityFixtures.sol`** — auxiliary fixtures for the security category: `UnsafeInitializer` (front-runnable initializer pattern) and `TxOriginSensor` (records `tx.origin` / `msg.sender` / `address(this)` so tests can prove sponsor-vs-authority semantics).
 
 ## Requirements
 
@@ -151,11 +159,11 @@ See [`targets/rpc.example.json`](targets/rpc.example.json) for the full schema.
 
 ## Roadmap
 
-The current prototype covers the transport, authorization, and execution layers against a provider-first target. The natural expansion path:
+The current prototype covers the transport, authorization, execution, and security-misuse layers against a provider-first target. The natural expansion path:
 
 1. **Wallet adapters.** Adapter-level tests that exercise a wallet's real signing and UX flow for type-`0x04`, instead of just the provider.
 2. **Relayer / sponsor flows.** Self-sponsored transactions (authority == sender), third-party relayer paths, and nonce-boundary tests.
-3. **Security and misuse tests.** Initialization front-running, storage-layout footguns, `tx.origin` misuse, replay boundaries, and over-trusted delegate code patterns identified in the EIP security considerations.
+3. **Deeper security layer.** Extend the current security category with replay boundaries, over-trusted delegate patterns, storage-layout collisions across heterogeneous delegates, and fund-drain scenarios via over-permissive fallback handlers.
 4. **Batched authorization coverage.** Multiple authorizations in a single type-`0x04` transaction (pending a native RLP builder or updated `cast mktx` with multi-`--auth` support).
 5. **Capability discovery.** Target-level metadata (`eth_feeHistory`, `debug_traceCall`, supported authorization-list fields) so the matrix report can explain *why* a target partially supports a feature.
 6. **Public matrices.** CI-published compatibility matrices across real ecosystem endpoints, with history so regressions are visible.

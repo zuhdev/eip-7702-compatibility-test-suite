@@ -1,7 +1,7 @@
 # EIP-7702 Compatibility Matrix
 
 - **Suite:** eip-7702-compatibility-test-suite v0.2.0
-- **Generated:** 2026-04-21T10:12:40.089Z
+- **Generated:** 2026-04-21T11:06:11.734Z
 
 ## Summary
 
@@ -13,7 +13,7 @@
 
 | Target | Kind | Result | Passed | Failed | Report |
 | --- | --- | --- | --- | --- | --- |
-| local-managed | managed-anvil | PASS | 13 | 0 | [markdown](local-managed/report.md) |
+| local-managed | managed-anvil | PASS | 16 | 0 | [markdown](local-managed/report.md) |
 
 ## Notes
 

@@ -1,7 +1,7 @@
 {
   "suite": "eip-7702-compatibility-test-suite",
   "version": "0.2.0",
-  "generatedAt": "2026-04-21T10:12:40.089Z",
+  "generatedAt": "2026-04-21T11:06:11.734Z",
   "summary": {
     "totalTargets": 1,
     "passingTargets": 1,
@@ -18,8 +18,8 @@
       "kind": "managed-anvil",
       "status": "pass",
       "targetSummary": {
-        "total": 13,
-        "passed": 13,
+        "total": 16,
+        "passed": 16,
         "failed": 0,
         "skipped": 0
       },
