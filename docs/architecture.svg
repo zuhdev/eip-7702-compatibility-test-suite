@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" width="1200" height="660" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5aa0a8"/>
+    </marker>
+    <style>
+      .box { fill: #141c24; stroke: #2a3a47; stroke-width: 1.5; }
+      .box-primary { fill: #141c24; stroke: #5aa0a8; stroke-width: 2; }
+      .box-io { fill: #0e1419; stroke: #2a3a47; stroke-width: 1.5; stroke-dasharray: 4 3; }
+      .title { fill: #e5eef1; font-size: 18px; font-weight: 600; }
+      .title-mono { fill: #e5eef1; font-size: 17px; font-weight: 600; font-family: 'SF Mono', ui-monospace, Menlo, Monaco, 'Cascadia Mono', Consolas, monospace; }
+      .subtitle { fill: #8ea9b0; font-size: 13px; }
+      .arrow { stroke: #5aa0a8; stroke-width: 1.8; fill: none; }
+      .arrow-soft { stroke: #3d5d65; stroke-width: 1.5; fill: none; stroke-dasharray: 4 3; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="660" fill="#0a0f14"/>
+
+  <!-- Tier 1: inputs -->
+  <g>
+    <rect class="box-io" x="360" y="40" width="220" height="70" rx="8"/>
+    <text class="title-mono" x="470" y="73" text-anchor="middle">targets/*.json</text>
+    <text class="subtitle" x="470" y="94" text-anchor="middle">target configs</text>
+
+    <rect class="box-io" x="620" y="40" width="220" height="70" rx="8"/>
+    <text class="title-mono" x="730" y="73" text-anchor="middle">contracts/*.sol</text>
+    <text class="subtitle" x="730" y="94" text-anchor="middle">fixture contracts</text>
+  </g>
+
+  <!-- arrows tier1 → tier2 -->
+  <path class="arrow" d="M 470 110 L 470 150" marker-end="url(#arrow)"/>
+  <path class="arrow-soft" d="M 730 110 L 600 260" marker-end="url(#arrow)"/>
+
+  <!-- Tier 2: config -->
+  <g>
+    <rect class="box" x="360" y="150" width="220" height="70" rx="8"/>
+    <text class="title-mono" x="470" y="183" text-anchor="middle">config.ts</text>
+    <text class="subtitle" x="470" y="204" text-anchor="middle">normalizes managed-anvil vs rpc</text>
+  </g>
+
+  <!-- arrow tier2 → tier3 center -->
+  <path class="arrow" d="M 470 220 L 470 260" marker-end="url(#arrow)"/>
+
+  <!-- Tier 3: core orchestrator + adapters -->
+  <g>
+    <rect class="box" x="80" y="260" width="220" height="80" rx="8"/>
+    <text class="title-mono" x="190" y="293" text-anchor="middle">foundry.ts</text>
+    <text class="subtitle" x="190" y="314" text-anchor="middle">cast / forge wrappers</text>
+    <text class="subtitle" x="190" y="332" text-anchor="middle">(signing, building)</text>
+
+    <rect class="box-primary" x="360" y="260" width="220" height="80" rx="8"/>
+    <text class="title-mono" x="470" y="293" text-anchor="middle">suite.ts</text>
+    <text class="subtitle" x="470" y="314" text-anchor="middle">test plan + orchestration</text>
+    <text class="subtitle" x="470" y="332" text-anchor="middle">(16 spec-aligned tests)</text>
+
+    <rect class="box" x="640" y="260" width="220" height="80" rx="8"/>
+    <text class="title-mono" x="750" y="293" text-anchor="middle">rpc.ts</text>
+    <text class="subtitle" x="750" y="314" text-anchor="middle">JSON-RPC client</text>
+    <text class="subtitle" x="750" y="332" text-anchor="middle">(structured errors)</text>
+  </g>
+
+  <!-- arrows between suite and adapters (bi-directional via two arrows) -->
+  <path class="arrow" d="M 360 300 L 300 300" marker-end="url(#arrow)"/>
+  <path class="arrow" d="M 580 300 L 640 300" marker-end="url(#arrow)"/>
+
+  <!-- Tier 4: report -->
+  <path class="arrow" d="M 470 340 L 470 400" marker-end="url(#arrow)"/>
+  <g>
+    <rect class="box" x="360" y="400" width="220" height="70" rx="8"/>
+    <text class="title-mono" x="470" y="433" text-anchor="middle">report.ts</text>
+    <text class="subtitle" x="470" y="454" text-anchor="middle">JSON + Markdown rendering</text>
+  </g>
+
+  <!-- Tier 5: outputs -->
+  <path class="arrow" d="M 430 470 L 300 540" marker-end="url(#arrow)"/>
+  <path class="arrow" d="M 510 470 L 640 540" marker-end="url(#arrow)"/>
+  <g>
+    <rect class="box-io" x="180" y="540" width="240" height="70" rx="8"/>
+    <text class="title-mono" x="300" y="573" text-anchor="middle">report.json</text>
+    <text class="subtitle" x="300" y="594" text-anchor="middle">machine-readable</text>
+
+    <rect class="box-io" x="520" y="540" width="240" height="70" rx="8"/>
+    <text class="title-mono" x="640" y="573" text-anchor="middle">report.md</text>
+    <text class="subtitle" x="640" y="594" text-anchor="middle">human-readable</text>
+  </g>
+
+  <!-- right-side: target environment -->
+  <g>
+    <rect class="box-io" x="900" y="260" width="240" height="80" rx="8"/>
+    <text class="title" x="1020" y="293" text-anchor="middle">target</text>
+    <text class="subtitle" x="1020" y="314" text-anchor="middle">local Anvil or</text>
+    <text class="subtitle" x="1020" y="332" text-anchor="middle">hosted JSON-RPC endpoint</text>
+  </g>
+  <path class="arrow" d="M 860 300 L 900 300" marker-end="url(#arrow)"/>
+  <path class="arrow" d="M 900 310 L 860 310" marker-end="url(#arrow)"/>
+
+  <!-- legend -->
+  <g transform="translate(900, 160)">
+    <rect class="box-primary" x="0" y="0" width="20" height="14" rx="2"/>
+    <text class="subtitle" x="28" y="12">orchestrator</text>
+    <rect class="box" x="0" y="24" width="20" height="14" rx="2"/>
+    <text class="subtitle" x="28" y="36">module</text>
+    <rect class="box-io" x="0" y="48" width="20" height="14" rx="2"/>
+    <text class="subtitle" x="28" y="60">input / output</text>
+  </g>
+</svg>

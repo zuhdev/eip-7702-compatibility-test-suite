@@ -60,29 +60,7 @@ These tests model the misuse patterns the EIP-7702 security considerations call 
 
 ## Architecture
 
-```
-                +-----------------+
-                |   targets/*.json |
-                +--------+--------+
-                         |
-                         v
-                +-----------------+
-                |      config     |  normalizes managed-anvil vs rpc targets
-                +--------+--------+
-                         |
-                         v
-+----------------+  +-----------------+  +----------------+
-|   foundry.ts   |  |    suite.ts     |  |     rpc.ts     |
-|  cast / forge  |<-+  test plan +   +->+  JSON-RPC client|
-|  wrappers      |  |  orchestration  |  |                |
-+--------+-------+  +--------+--------+  +----------------+
-         |                   |
-         |                   v
-         |          +-----------------+
-         +--------->+    report.ts    +----> reports/*/report.json
-                    |  JSON + MD gen  +----> reports/*/report.md
-                    +-----------------+
-```
+![Architecture](docs/architecture.svg)
 
 - **`src/suite.ts`** — every test is a `TestDefinition` with a category, description, and `run(context)` returning assertions plus evidence. Adding a new test is a single entry in the test plan.
 - **`src/foundry.ts`** — thin wrappers around `cast wallet sign-auth`, `cast mktx`, `cast calldata`, and `forge build`. No signing logic lives in TypeScript — the cryptography is delegated to foundry.
